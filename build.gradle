@@ -11,9 +11,11 @@ ext {
     GIT_INFO = GradleUtils.gitInfo(file('.'))
 }
 
-group 'net.minecraftforge.gradleutils'
-version GradleUtils.getTagOffsetVersion(GIT_INFO)
+group = 'net.minecraftforge.gradleutils'
+version = GradleUtils.getTagOffsetVersion(GIT_INFO)
 println('Version: ' + version)
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 repositories {
     mavenCentral()
@@ -34,6 +36,19 @@ task copyGradleUtils(type: Copy) {
 compileGroovy.dependsOn(copyGradleUtils)
 checkLicenseMain.dependsOn(copyGradleUtils)
 
+jar {
+    manifest {
+        attributes([
+                'Specification-Title': 'GradleUtils',
+                'Specification-Vendor': 'Forge Development LLC',
+                'Specification-Version': GIT_INFO.tag,
+                'Implementation-Title': 'GradleUtils',
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'Forge Development LLC'
+        ])
+    }
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
@@ -43,14 +58,22 @@ artifacts {
     archives sourcesJar
 }
 
-license {
-    header = file('HEADER')
+def licenseConfig = {
+    header = rootProject.file('HEADER')
     ext {
         name = 'GradleUtils'
         year = 2021
         fullname = 'Forge Development LLC'
     }
     exclude '**/*.properties'
+}
+
+license licenseConfig
+
+subprojects {
+    apply plugin: 'org.cadixdev.licenser'
+
+    license licenseConfig
 }
 
 gradlePlugin {

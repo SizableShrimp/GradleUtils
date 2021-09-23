@@ -20,9 +20,12 @@
 
 package net.minecraftforge.gradleutils
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.compile.JavaCompile
 
 import javax.inject.Inject
 
@@ -139,5 +142,17 @@ class GradleUtilsExtension {
      */
     Closure getForgeMaven() {
         return GradleUtils.getForgeMaven()
+    }
+
+    void deprecatedProcessor(SourceSet sourceSet, Action<DeprecatedProcessor> action) {
+        def depProc = new DeprecatedProcessor()
+        action.execute(depProc)
+        JavaCompile compileTask = project.tasks.getByName(sourceSet.compileJavaTaskName) as JavaCompile
+        def compilerArgs = compileTask.options.compilerArgs
+
+        if (depProc.compilationErrorDisabled)
+            compilerArgs.add("-AdisableMinecraftDeprecatedError=true")
+        if (depProc.minecraftVersion)
+            compilerArgs.add("-AminecraftVersion=${depProc.minecraftVersion}")
     }
 }

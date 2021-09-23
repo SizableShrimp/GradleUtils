@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+version = rootProject.version
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(9)
+
+configurations {
+    implementation.extendsFrom shadow
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net/' }
+}
+
+dependencies {
+    shadow 'net.minecraftforge:srgutils:0.4.3'
+}
+
+shadowJar {
+    archiveClassifier = 'processor'
+}
+
+rootProject.publishing.publications.pluginMaven.artifact shadowJar
